@@ -1,24 +1,86 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import About from './components/About';
+import Tasks from './components/Tasks';
+import AddTask from './components/AddTask';
 
 function App() {
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      text: 'Meeting at a cafe',
+      day: 'Feb 7th at 8am',
+      reminder: true,
+    },
+    {
+      id: 2,
+      text: 'Doctors Appointment',
+      day: 'Feb 9th at 3pm',
+      reminder: true,
+    },
+    {
+      id: 3,
+      text: 'Clothes shopping',
+      day: 'Feb 11th at 5pm',
+      reminder: false,
+    },
+  ]);
+
+  // Add task
+  const addTask = (task) => {
+    const id = Date.now();
+    const newTask = { id, ...task };
+
+    // Add the new task
+    setTasks([...tasks, newTask]);
+  };
+
+  // Delete task
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  // Toggle reminder
+  const toggleReminder = (id) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, reminder: !task.reminder } : task
+      )
+    );
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="container">
+        <Header
+          onAdd={() => setShowAddTask(!showAddTask)}
+          showAdd={showAddTask}
+        />
+        <Route
+          path="/"
+          exact
+          render={(props) => (
+            <>
+              {showAddTask && <AddTask onAdd={addTask} />}
+              {tasks.length > 0 ? (
+                <Tasks
+                  tasks={tasks}
+                  onDelete={deleteTask}
+                  onToggle={toggleReminder}
+                />
+              ) : (
+                'No tasks'
+              )}
+            </>
+          )}
+        />
+        <Route path="/about" component={About} />
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
